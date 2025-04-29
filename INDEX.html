@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lector de Texto</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+    #texto { width: 100%; height: 200px; }
+    button, select, input[type=range] { margin: 5px; padding: 10px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h2>Subí un archivo de texto y escuchalo</h2>
+  <input type="file" id="archivo" accept=".txt"><br><br>
+
+  <textarea id="texto" placeholder="El contenido aparecerá aquí..."></textarea><br>
+
+  <label>Velocidad: <span id="velocidad-valor">1</span>x</label><br>
+  <input type="range" id="velocidad" min="0.5" max="2" step="0.1" value="1"><br>
+
+  <button onclick="leerTexto()">▶️ Reproducir</button>
+  <button onclick="pausarTexto()">⏸️ Pausar</button>
+  <button onclick="reanudarTexto()">⏯️ Reanudar</button>
+  <button onclick="detenerTexto()">⏹️ Detener</button>
+
+  <script>
+    let mensaje = null;
+
+    document.getElementById('archivo').addEventListener('change', function() {
+      const archivo = this.files[0];
+      const lector = new FileReader();
+      lector.onload = function(e) {
+        document.getElementById('texto').value = e.target.result;
+      };
+      if (archivo) lector.readAsText(archivo);
+    });
+
+    document.getElementById('velocidad').addEventListener('input', function() {
+      document.getElementById('velocidad-valor').innerText = this.value;
+    });
+
+    function leerTexto() {
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel(); // Cancela cualquier lectura anterior
+      }
+      const texto = document.getElementById('texto').value;
+      mensaje = new SpeechSynthesisUtterance(texto);
+      mensaje.lang = 'es-ES';
+      mensaje.rate = parseFloat(document.getElementById('velocidad').value);
+      speechSynthesis.speak(mensaje);
+    }
+
+    function pausarTexto() {
+      if (speechSynthesis.speaking && !speechSynthesis.paused) {
+        speechSynthesis.pause();
+      }
+    }
+
+    function reanudarTexto() {
+      if (speechSynthesis.paused) {
+        speechSynthesis.resume();
+      }
+    }
+
+    function detenerTexto() {
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+      }
+    }
+  </script>
+
+</body>
+</html>
+
